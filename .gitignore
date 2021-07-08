@@ -1,0 +1,4 @@
+cover.out
+*.exe
+*.txt
+.env
