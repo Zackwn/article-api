@@ -12,15 +12,15 @@ const (
 )
 
 func NewUser(name, email, password string) (*User, error) {
-	// validate password
+	// validation
 	if len(password) <= 6 {
-		return nil, UserError{reason: "Invalid password."}
+		return nil, UserError{reason: "Invalid password"}
 	}
 	if _, err := mail.ParseAddress(email); err != nil {
-		return nil, UserError{reason: "Invalid email."}
+		return nil, UserError{reason: "Invalid email"}
 	}
 	if len(name) == 0 {
-		return nil, UserError{reason: "Invalid name."}
+		return nil, UserError{reason: "Invalid name"}
 	}
 
 	user := new(User)

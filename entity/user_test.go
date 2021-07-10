@@ -16,7 +16,7 @@ func TestNewUserValid(t *testing.T) {
 func TestNewUserInvalid(t *testing.T) {
 	_, err := NewUser("validname", "invalidEmail", "v4lidp#ssword")
 
-	expectErr := UserError{reason: "Invalid email."}
+	expectErr := UserError{reason: "Invalid email"}
 	if errors.Is(err, expectErr) == false {
 		t.Errorf("Expect %v Got %v", expectErr, err)
 	}
