@@ -12,6 +12,13 @@ type UserRepository interface {
 	Store(user *entity.User) error
 }
 
+type ArticleRepository interface {
+	FindByID(ID string) (*entity.Article, bool)
+	FindAllByAuthor(authorID string) []*entity.Article
+
+	Store(article *entity.Article) error
+}
+
 type PasswordHasher interface {
 	HashPassword(password string) string
 	CompareHashAndPassword(hashPassword, password string) error
