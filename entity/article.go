@@ -29,8 +29,8 @@ func (err ArticleError) Error() string {
 }
 
 type Article struct {
-	ID       string `json:"id"`
-	Title    string `json:"title"`
-	Content  string `json:"content"`
-	AuthorID string `json:"author_id"`
+	ID       string `json:"id" bson:"id"`
+	Title    string `json:"title" bson:"title"`
+	Content  string `json:"content" bson:"content"`
+	AuthorID string `json:"author_id" bson:"author_id"`
 }
