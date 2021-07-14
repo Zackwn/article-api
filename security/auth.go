@@ -39,7 +39,7 @@ func (auth AuthProvider) Sign(userID string) string {
 	tokenClaims := TokenClaims{
 		UserID: userID,
 		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(time.Minute).Unix(),
+			ExpiresAt: time.Now().Add(time.Hour).Unix(),
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, tokenClaims)

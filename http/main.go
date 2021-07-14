@@ -41,10 +41,12 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	db := client.Database("articledb")
 	fmt.Println("Successfully connected to the Database.")
 
 	// services
-	userRepository := mongodb.NewUserRepository(client.Database("articledb"))
+	userRepository := mongodb.NewUserRepository(db)
+	articleRepository := mongodb.NewArticleRepository(db)
 	passwordHasher := security.NewPasswordHasher()
 	authProvider := security.NewAuthProvider()
 
@@ -56,13 +58,13 @@ func main() {
 	userLoginUseCase := usecase.NewUserLoginUseCase(userRepository, passwordHasher, authProvider)
 	userSigninController := c.NewUserSigninController(userLoginUseCase)
 
-	// test auth
-	testAuthUseCase := usecase.NewTestAuthUseCase(authProvider)
-	testAuthController := c.NewTestAuthController(testAuthUseCase)
+	// create article
+	createArticleUseCase := usecase.NewCreateArticleUseCase(authProvider, articleRepository)
+	createArticleController := c.NewCreateArticleController(createArticleUseCase)
 
 	http.HandleFunc("/user/signup", adaptController(userSignupController))
 	http.HandleFunc("/user/signin", adaptController(userSigninController))
-	http.HandleFunc("/testauth", adaptController(testAuthController))
+	http.HandleFunc("/article/create", adaptController(createArticleController))
 
 	fmt.Println("Server started...")
 	http.ListenAndServe(":8080", nil)
