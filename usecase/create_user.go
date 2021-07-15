@@ -4,14 +4,6 @@ import (
 	"github.com/zackwn/article-api/entity"
 )
 
-type ErrUserAlreadyExists struct {
-	Email string
-}
-
-func (err ErrUserAlreadyExists) Error() string {
-	return `user with email: "` + err.Email + `" already exists.`
-}
-
 func NewCreateUserUseCase(repo UserRepository, passHasher PasswordHasher) *CreateUserUseCase {
 	return &CreateUserUseCase{userRepository: repo, passwordHasher: passHasher}
 }

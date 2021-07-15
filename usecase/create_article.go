@@ -6,12 +6,6 @@ import (
 	"github.com/zackwn/article-api/entity"
 )
 
-type ErrInvalidAccessToken struct{}
-
-func (ErrInvalidAccessToken) Error() string {
-	return "invalid access token"
-}
-
 func NewCreateArticleUseCase(auth AuthProvider, articleRepo ArticleRepository) *CreateArticleUseCase {
 	return &CreateArticleUseCase{authProvider: auth, articleRepository: articleRepo}
 }
