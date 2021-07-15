@@ -16,10 +16,14 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
-func adaptController(controller c.Controller) func(w http.ResponseWriter, req *http.Request) {
+func adaptController(method string, controller c.Controller) func(w http.ResponseWriter, req *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
-		res := controller.Handle(req)
 		w.Header().Set("Content-Type", "application/json")
+		if req.Method != method {
+			w.WriteHeader(http.StatusMethodNotAllowed)
+			return
+		}
+		res := controller.Handle(req)
 		w.WriteHeader(res.StatusCode)
 		if len(res.Data) != 0 {
 			w.Write(res.Data)
@@ -62,9 +66,9 @@ func main() {
 	createArticleUseCase := usecase.NewCreateArticleUseCase(authProvider, articleRepository)
 	createArticleController := c.NewCreateArticleController(createArticleUseCase)
 
-	http.HandleFunc("/user/signup", adaptController(userSignupController))
-	http.HandleFunc("/user/signin", adaptController(userSigninController))
-	http.HandleFunc("/article/create", adaptController(createArticleController))
+	http.HandleFunc("/user/signup", adaptController("POST", userSignupController))
+	http.HandleFunc("/user/signin", adaptController("POST", userSigninController))
+	http.HandleFunc("/article/create", adaptController("POST", createArticleController))
 
 	fmt.Println("Server started...")
 	http.ListenAndServe(":8080", nil)
