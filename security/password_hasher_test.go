@@ -1,7 +1,6 @@
 package security
 
 import (
-	"errors"
 	"os"
 	"testing"
 )
@@ -28,24 +27,23 @@ func TestHashPassword(t *testing.T) {
 	}
 }
 
-func TestCompareHashAndPassword(t *testing.T) {
+func TestCompareHashAndPasswordValid(t *testing.T) {
 	password := "d17gd8f16df1wm"
 	hash := passwordHasher.HashPassword(password)
 
-	err := passwordHasher.CompareHashAndPassword(hash, password)
-	if err != nil {
-		t.Errorf("Expect %v Got %v", nil, err)
+	passValid := passwordHasher.CompareHashAndPassword(hash, password)
+	if !passValid {
+		t.Errorf("Expect %v Got %v", "true", passValid)
 	}
 }
 
-func TestCompareHashAndPasswordErr(t *testing.T) {
+func TestCompareHashAndPasswordInvalid(t *testing.T) {
 	password := "d1hu912dg7861e"
 	hash := passwordHasher.HashPassword(password)
 
-	err := passwordHasher.CompareHashAndPassword(hash, "wrong password")
+	passValid := passwordHasher.CompareHashAndPassword(hash, "wrong password")
 
-	expectErr := ErrWrongPassword{}
-	if errors.Is(err, expectErr) == false {
-		t.Errorf("Expect ErrWrongPassword Got %v", err)
+	if passValid {
+		t.Errorf("Expect %v Got %v", "false", passValid)
 	}
 }

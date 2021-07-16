@@ -10,12 +10,6 @@ func NewPasswordHasher() *PasswordHasher {
 	return new(PasswordHasher)
 }
 
-type ErrWrongPassword struct{}
-
-func (ErrWrongPassword) Error() string {
-	return "wrong password."
-}
-
 type PasswordHasher struct{}
 
 func (PasswordHasher) HashPassword(password string) string {
@@ -26,10 +20,10 @@ func (PasswordHasher) HashPassword(password string) string {
 	return string(hashPassword)
 }
 
-func (PasswordHasher) CompareHashAndPassword(hashPassword, password string) error {
+func (PasswordHasher) CompareHashAndPassword(hashPassword, password string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hashPassword), []byte(password))
 	if err != nil {
-		return ErrWrongPassword{}
+		return false
 	}
-	return nil
+	return true
 }

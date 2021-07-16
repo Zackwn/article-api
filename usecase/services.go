@@ -21,7 +21,7 @@ type ArticleRepository interface {
 
 type PasswordHasher interface {
 	HashPassword(password string) string
-	CompareHashAndPassword(hashPassword, password string) error
+	CompareHashAndPassword(hashPassword, password string) bool
 }
 
 type AuthProvider interface {

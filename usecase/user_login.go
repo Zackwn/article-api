@@ -1,13 +1,5 @@
 package usecase
 
-type ErrUserDoNotExists struct {
-	Email string
-}
-
-func (err ErrUserDoNotExists) Error() string {
-	return `user with email: "` + err.Email + `" do not exists.`
-}
-
 func NewUserLoginUseCase(repo UserRepository, passHasher PasswordHasher, auth AuthProvider) *UserLoginUseCase {
 	return &UserLoginUseCase{userRepository: repo, passwordHasher: passHasher, authProvider: auth}
 }
@@ -18,14 +10,14 @@ type UserLoginUseCase struct {
 	authProvider   AuthProvider
 }
 
-func (userLoginUseCase UserLoginUseCase) Exec(email, password string) (string, error) {
+func (userLoginUseCase UserLoginUseCase) Exec(email, password string) (string, UseCaseErr) {
 	user, found := userLoginUseCase.userRepository.FindByEmail(email)
 	if !found {
-		return "", &ErrUserDoNotExists{Email: email}
+		return "", &ErrUserDoNotExists{}
 	}
-	err := userLoginUseCase.passwordHasher.CompareHashAndPassword(user.Password, password)
-	if err != nil {
-		return "", err
+	passValid := userLoginUseCase.passwordHasher.CompareHashAndPassword(user.Password, password)
+	if !passValid {
+		return "", ErrWrongPassword{}
 	}
 	accessToken := userLoginUseCase.authProvider.Sign(user.ID)
 	return accessToken, nil

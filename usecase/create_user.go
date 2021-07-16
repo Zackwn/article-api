@@ -13,7 +13,7 @@ type CreateUserUseCase struct {
 	passwordHasher PasswordHasher
 }
 
-func (createUserUseCase CreateUserUseCase) Exec(name, email, password string) error {
+func (createUserUseCase CreateUserUseCase) Exec(name, email, password string) UseCaseErr {
 	_, userAlreadyExists := createUserUseCase.userRepository.FindByEmail(email)
 	if userAlreadyExists {
 		return ErrUserAlreadyExists{Email: email}
@@ -23,8 +23,11 @@ func (createUserUseCase CreateUserUseCase) Exec(name, email, password string) er
 
 	user, err := entity.NewUser(name, email, hashPassword)
 	if err != nil {
-		return err
+		return ErrInvalidEntityField{errMessage: err.Error()}
 	}
-
-	return createUserUseCase.userRepository.Store(user)
+	err = createUserUseCase.userRepository.Store(user)
+	if err != nil {
+		return ErrInvalidEntityField{errMessage: err.Error()}
+	}
+	return nil
 }

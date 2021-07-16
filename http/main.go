@@ -63,7 +63,7 @@ func main() {
 	userSigninController := c.NewUserSigninController(userLoginUseCase)
 
 	// create article
-	createArticleUseCase := usecase.NewCreateArticleUseCase(authProvider, articleRepository)
+	createArticleUseCase := usecase.NewCreateArticleUseCase(authProvider, articleRepository, userRepository)
 	createArticleController := c.NewCreateArticleController(createArticleUseCase)
 
 	http.HandleFunc("/user/signup", adaptController("POST", userSignupController))

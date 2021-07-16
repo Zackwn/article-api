@@ -8,10 +8,10 @@ import (
 type UserPermission int
 
 const (
-	CreateArticles UserPermission = 1 << iota
-	DeleteArticles
+	CreateArticlesPermission UserPermission = 1 << iota
+	DeleteArticlesPermission
 
-	DefaultPermission UserPermission = CreateArticles
+	DefaultPermission UserPermission = CreateArticlesPermission
 )
 
 func NewUser(name, email, password string) (*User, error) {
