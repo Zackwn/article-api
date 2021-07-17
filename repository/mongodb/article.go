@@ -2,7 +2,6 @@ package mongodb
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"time"
 
@@ -48,7 +47,6 @@ func (repo ArticleRepository) FindAllByAuthor(authorID string) []*entity.Article
 	for cursor.Next(ctx) {
 		var result entity.Article
 		cursor.Decode(&result)
-		fmt.Println("here")
 		results = append(results, &result)
 	}
 	return results
@@ -63,4 +61,24 @@ func (repo ArticleRepository) Store(article *entity.Article) error {
 		return err
 	}
 	return nil
+}
+
+func (repo ArticleRepository) All() []*entity.Article {
+	collection := repo.db.Collection("article")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	var articles = make([]*entity.Article, 0)
+	cursor, err := collection.Find(ctx, bson.D{})
+	if err != nil && err != mongo.ErrNoDocuments {
+		log.Fatal(err)
+	}
+	for cursor.Next(ctx) {
+		var article entity.Article
+		err := cursor.Decode(&article)
+		if err != nil {
+			log.Fatal(err)
+		}
+		articles = append(articles, &article)
+	}
+	return articles
 }

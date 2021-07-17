@@ -47,3 +47,12 @@ func TestArticleFindByIDNotExisting(t *testing.T) {
 		t.Errorf("Expect %v Got %v", "false", found)
 	}
 }
+
+func TestArticlesAll(t *testing.T) {
+	article, _ := entity.NewArticle("title", "content", "b29f69a3-883c-446b-a8e7-bc1ca63435a6")
+	articleRepo.Store(article)
+	articles := articleRepo.All()
+	if len(articles) < 1 {
+		t.Errorf("Expect %v Got %v", "articles length to be more than 0", len(articles))
+	}
+}
