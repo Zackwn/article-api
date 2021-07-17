@@ -13,6 +13,7 @@ type UserRepository interface {
 }
 
 type ArticleRepository interface {
+	All() []*entity.Article
 	FindByID(ID string) (*entity.Article, bool)
 	FindAllByAuthor(authorID string) []*entity.Article
 
