@@ -2,7 +2,6 @@ package controller
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/zackwn/article-api/usecase"
@@ -27,8 +26,6 @@ type UserSigninController struct {
 
 func (userSigninController UserSigninController) Handle(req *http.Request) *Response {
 	defer req.Body.Close()
-
-	fmt.Println("authorization:", req.Header.Get("authorization"))
 
 	var data UserSigninDTO
 	json.NewDecoder(req.Body).Decode(&data)

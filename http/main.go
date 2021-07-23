@@ -54,21 +54,22 @@ func main() {
 	passwordHasher := security.NewPasswordHasher()
 	authProvider := security.NewAuthProvider()
 
-	// user signup
+	// usecases
 	createUserUseCase := usecase.NewCreateUserUseCase(userRepository, passwordHasher)
-	userSignupController := c.NewUserSignupController(createUserUseCase)
-
-	// user signin
 	userLoginUseCase := usecase.NewUserLoginUseCase(userRepository, passwordHasher, authProvider)
-	userSigninController := c.NewUserSigninController(userLoginUseCase)
-
-	// create article
 	createArticleUseCase := usecase.NewCreateArticleUseCase(authProvider, articleRepository, userRepository)
+	listArticles := usecase.NewListArticlesUseCase(articleRepository, userRepository)
+
+	// controllers
+	userSignupController := c.NewUserSignupController(createUserUseCase)
+	userSigninController := c.NewUserSigninController(userLoginUseCase)
 	createArticleController := c.NewCreateArticleController(createArticleUseCase)
+	listArticlesController := c.NewListArticlesController(listArticles)
 
 	http.HandleFunc("/user/signup", adaptController("POST", userSignupController))
 	http.HandleFunc("/user/signin", adaptController("POST", userSigninController))
-	http.HandleFunc("/article/create", adaptController("POST", createArticleController))
+	http.HandleFunc("/articles/create", adaptController("POST", createArticleController))
+	http.HandleFunc("/articles/list", adaptController("GET", listArticlesController))
 
 	fmt.Println("Server started...")
 	http.ListenAndServe(":8080", nil)

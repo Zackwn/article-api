@@ -4,14 +4,14 @@ import (
 	"encoding/json"
 	"log"
 
-	. "github.com/zackwn/article-api/usecase"
+	uc "github.com/zackwn/article-api/usecase"
 )
 
 func StatusResponse(statusCode int) *Response {
 	return &Response{StatusCode: statusCode}
 }
 
-func ErrorResponse(useCaseErr UseCaseErr) *Response {
+func ErrorResponse(useCaseErr uc.UseCaseErr) *Response {
 	errRes := struct {
 		Message string `json:"error"`
 	}{Message: useCaseErr.Error()}

@@ -43,13 +43,13 @@ func (repo ArticleRepository) FindAllByAuthor(authorID string) []*entity.Article
 	if err != nil {
 		log.Fatal(err)
 	}
-	var results []*entity.Article
+	var articles = make([]*entity.Article, 0)
 	for cursor.Next(ctx) {
 		var result entity.Article
 		cursor.Decode(&result)
-		results = append(results, &result)
+		articles = append(articles, &result)
 	}
-	return results
+	return articles
 }
 
 func (repo ArticleRepository) Store(article *entity.Article) error {

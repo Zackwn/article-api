@@ -50,6 +50,11 @@ func TestListArticles(t *testing.T) {
 			ResultLength:   3,
 			NilErrorResult: true,
 		},
+		{
+			filterOptions:  ListArticlesFilterOptions{ID: article1.ID, AuthorID: article1.AuthorID},
+			ResultLength:   1,
+			NilErrorResult: true,
+		},
 	}
 
 	for _, listArticleTest := range listArticleTests {
@@ -59,5 +64,23 @@ func TestListArticles(t *testing.T) {
 		} else if len(result) != listArticleTest.ResultLength {
 			t.Errorf("Expect %v Got %v", listArticleTest.ResultLength, len(result))
 		}
+	}
+}
+
+func TestListArticlesWithTwoOptions(t *testing.T) {
+	user1, _ := entity.NewUser("user1", "testlistarticleswithtwoptions1@mail.com", "password123")
+	user2, _ := entity.NewUser("user2", "testlistarticleswithtwoptions2@mail.com", "password123")
+	userRepository.Store(user1)
+	userRepository.Store(user2)
+	article, _ := entity.NewArticle("article by user1", "content", user1.ID)
+	articleRepository.Store(article)
+	result, _ := listArticlesUseCase.Exec(&ListArticlesDTO{
+		FilterOptions: ListArticlesFilterOptions{
+			ID:       article.ID,
+			AuthorID: user2.ID,
+		},
+	})
+	if result[0] != nil {
+		t.Errorf("Expect %v Got %v", nil, result[0])
 	}
 }
