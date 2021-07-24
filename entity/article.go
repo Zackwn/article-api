@@ -1,5 +1,9 @@
 package entity
 
+import (
+	"time"
+)
+
 func NewArticle(title, content, authorID string) (*Article, error) {
 	// validation
 	if title == "" {
@@ -17,6 +21,7 @@ func NewArticle(title, content, authorID string) (*Article, error) {
 	article.Title = title
 	article.Content = content
 	article.AuthorID = authorID
+	article.CreatedAt = Date{time.Now()}
 	return article, nil
 }
 
@@ -29,8 +34,9 @@ func (err ArticleError) Error() string {
 }
 
 type Article struct {
-	ID       string `json:"id" bson:"id"`
-	Title    string `json:"title" bson:"title"`
-	Content  string `json:"content" bson:"content"`
-	AuthorID string `json:"author_id" bson:"author_id"`
+	ID        string `json:"id" bson:"id"`
+	Title     string `json:"title" bson:"title"`
+	Content   string `json:"content" bson:"content"`
+	AuthorID  string `json:"author_id" bson:"author_id"`
+	CreatedAt Date   `json:"created_at" bson:"created_at"`
 }
