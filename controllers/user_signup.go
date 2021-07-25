@@ -2,6 +2,7 @@ package controller
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/zackwn/article-api/usecase"
@@ -46,7 +47,7 @@ func (userSignUpController UserSignupController) Handle(req *http.Request) *Resp
 		return StatusResponse(http.StatusBadRequest)
 	}
 	defer file.Close()
-	pictureURL, err := userSignUpController.fileStorage.Store(file, fileHeader)
+	pictureURL, filename, err := userSignUpController.fileStorage.Store(file, fileHeader)
 	if err != nil {
 		return StatusResponse(http.StatusBadRequest)
 	}
@@ -62,6 +63,10 @@ func (userSignUpController UserSignupController) Handle(req *http.Request) *Resp
 	}
 	uErr := userSignUpController.createUserUseCase.Exec(dto)
 	if uErr != nil {
+		err = userSignUpController.fileStorage.Discard(filename)
+		if err != nil {
+			log.Println(err)
+		}
 		return ErrorResponse(uErr)
 	}
 	return StatusResponse(http.StatusOK)

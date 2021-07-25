@@ -15,21 +15,25 @@ func NewFileStorage() *FileStorage {
 
 type FileStorage struct{}
 
-func (FileStorage) Store(file multipart.File, header *multipart.FileHeader) (string, error) {
+func (FileStorage) Store(file multipart.File, header *multipart.FileHeader) (string, string, error) {
 	bs, err := ioutil.ReadAll(file)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 	filename := uuid.NewString() + "-" + header.Filename
 	dst, err := os.Create(filepath.Join("./uploads/", filename))
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 	defer dst.Close()
 	_, err = dst.Write(bs)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 	URL := "http://localhost:8080/pictures/" + filename + "/"
-	return URL, nil
+	return URL, filename, nil
+}
+
+func (FileStorage) Discard(filename string) error {
+	return os.Remove("./uploads/" + filename)
 }
