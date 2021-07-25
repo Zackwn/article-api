@@ -16,7 +16,7 @@ func setupUserTests(db *mongo.Database) {
 
 func TestUserFindByEmailExisting(t *testing.T) {
 	email := "email@mail.com"
-	user, _ := entity.NewUser("name", email, "dwva8d7wafda76")
+	user, _ := entity.NewUser("name", email, "picture", "dwva8d7wafda76")
 	err := userRepo.Store(user)
 	if err != nil {
 		log.Fatal(err)
@@ -35,7 +35,7 @@ func TestUserFindByEmailNotExisting(t *testing.T) {
 }
 
 func TestUserFindByIDExisting(t *testing.T) {
-	user, _ := entity.NewUser("test", "existing@email.com", "67#afdawda8@11e")
+	user, _ := entity.NewUser("test", "existing@email.com", "picture", "67#afdawda8@11e")
 	err := userRepo.Store(user)
 	if err != nil {
 		log.Fatal(err)

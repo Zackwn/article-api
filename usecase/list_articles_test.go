@@ -23,7 +23,7 @@ type ListArticlesTestPair struct {
 }
 
 func TestListArticles(t *testing.T) {
-	user, _ := entity.NewUser("name", "listarticles@mail.com", "password")
+	user, _ := entity.NewUser("name", "listarticles@mail.com", "picture", "password")
 	userRepository.Store(user)
 	authorID := user.ID
 	article1, _ := entity.NewArticle("title article 1", "content article 1", authorID)
@@ -68,8 +68,8 @@ func TestListArticles(t *testing.T) {
 }
 
 func TestListArticlesWithTwoOptions(t *testing.T) {
-	user1, _ := entity.NewUser("user1", "testlistarticleswithtwoptions1@mail.com", "password123")
-	user2, _ := entity.NewUser("user2", "testlistarticleswithtwoptions2@mail.com", "password123")
+	user1, _ := entity.NewUser("user1", "testlistarticleswithtwoptions1@mail.com", "picture", "password123")
+	user2, _ := entity.NewUser("user2", "testlistarticleswithtwoptions2@mail.com", "picture", "password123")
 	userRepository.Store(user1)
 	userRepository.Store(user2)
 	article, _ := entity.NewArticle("article by user1", "content", user1.ID)

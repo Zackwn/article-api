@@ -16,6 +16,8 @@ type Date struct {
 }
 
 func (date Date) MarshalJSON() ([]byte, error) {
-	stamp := fmt.Sprintf("\"%s\"", date.Format(time.RFC3339))
+	// d := date.Format(time.RFC3339)
+	d := date.Format("01/02/2006 15:04")
+	stamp := fmt.Sprintf("\"%s\"", d)
 	return []byte(stamp), nil
 }

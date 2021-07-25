@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/zackwn/article-api/repository/mongodb"
-	"github.com/zackwn/article-api/security"
+	"github.com/zackwn/article-api/services/repository/mongodb"
+	"github.com/zackwn/article-api/services/security"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"

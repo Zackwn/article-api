@@ -13,15 +13,22 @@ type CreateUserUseCase struct {
 	passwordHasher PasswordHasher
 }
 
-func (createUserUseCase CreateUserUseCase) Exec(name, email, password string) UseCaseErr {
-	_, userAlreadyExists := createUserUseCase.userRepository.FindByEmail(email)
+type CreateUserDTO struct {
+	Name     string
+	Email    string
+	Password string
+	Picture  string
+}
+
+func (createUserUseCase CreateUserUseCase) Exec(dto *CreateUserDTO) UseCaseErr {
+	_, userAlreadyExists := createUserUseCase.userRepository.FindByEmail(dto.Email)
 	if userAlreadyExists {
-		return ErrUserAlreadyExists{Email: email}
+		return ErrUserAlreadyExists{Email: dto.Email}
 	}
 
-	hashPassword := createUserUseCase.passwordHasher.HashPassword(password)
+	hashPassword := createUserUseCase.passwordHasher.HashPassword(dto.Password)
 
-	user, err := entity.NewUser(name, email, hashPassword)
+	user, err := entity.NewUser(dto.Name, dto.Email, dto.Picture, hashPassword)
 	if err != nil {
 		return ErrInvalidEntityField{errMessage: err.Error()}
 	}

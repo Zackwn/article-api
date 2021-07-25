@@ -2,7 +2,7 @@ package usecase
 
 import (
 	"github.com/zackwn/article-api/entity"
-	"github.com/zackwn/article-api/security"
+	"github.com/zackwn/article-api/services/security"
 )
 
 type UserRepository interface {

@@ -14,7 +14,7 @@ const (
 	DefaultPermission UserPermission = CreateArticlesPermission
 )
 
-func NewUser(name, email, password string) (*User, error) {
+func NewUser(name, email, picture, password string) (*User, error) {
 	// validation
 	if len(password) <= 6 {
 		return nil, UserError{reason: "Invalid password"}
@@ -32,6 +32,7 @@ func NewUser(name, email, password string) (*User, error) {
 	user.Password = password
 	user.Email = email
 	user.Permission = DefaultPermission
+	user.Picture = picture
 	user.CreatedAt = Date{time.Now()}
 	return user, nil
 }
@@ -49,6 +50,7 @@ type User struct {
 	Name      string `json:"name" bson:"name"`
 	Password  string `json:"password" bson:"password"`
 	Email     string `json:"email" bson:"email"`
+	Picture   string `json:"picture" bson:"picture"`
 	CreatedAt Date   `json:"created_at" bson:"created_at"`
 
 	Permission UserPermission `json:"-" bson:"permission"`

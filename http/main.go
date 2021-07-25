@@ -3,13 +3,17 @@ package main
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
+	"path/filepath"
 	"time"
 
 	c "github.com/zackwn/article-api/controllers"
-	"github.com/zackwn/article-api/repository/mongodb"
-	"github.com/zackwn/article-api/security"
+	filestorage "github.com/zackwn/article-api/services/file_storage"
+	"github.com/zackwn/article-api/services/repository/mongodb"
+	"github.com/zackwn/article-api/services/security"
 	"github.com/zackwn/article-api/usecase"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -32,7 +36,6 @@ func adaptController(method string, controller c.Controller) func(w http.Respons
 }
 
 func main() {
-	fmt.Println("Connecting to the Database...")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://localhost:27017"))
@@ -46,13 +49,15 @@ func main() {
 		log.Fatal(err)
 	}
 	db := client.Database("articledb")
-	fmt.Println("Successfully connected to the Database.")
 
 	// services
-	userRepository := mongodb.NewUserRepository(db)
-	articleRepository := mongodb.NewArticleRepository(db)
 	passwordHasher := security.NewPasswordHasher()
 	authProvider := security.NewAuthProvider()
+	fileStorage := filestorage.NewFileStorage()
+
+	// repositories
+	userRepository := mongodb.NewUserRepository(db)
+	articleRepository := mongodb.NewArticleRepository(db)
 
 	// usecases
 	createUserUseCase := usecase.NewCreateUserUseCase(userRepository, passwordHasher)
@@ -61,7 +66,7 @@ func main() {
 	listArticles := usecase.NewListArticlesUseCase(articleRepository, userRepository)
 
 	// controllers
-	userSignupController := c.NewUserSignupController(createUserUseCase)
+	userSignupController := c.NewUserSignupController(createUserUseCase, fileStorage)
 	userSigninController := c.NewUserSigninController(userLoginUseCase)
 	createArticleController := c.NewCreateArticleController(createArticleUseCase)
 	listArticlesController := c.NewListArticlesController(listArticles)
@@ -71,6 +76,50 @@ func main() {
 	http.HandleFunc("/articles/create", adaptController("POST", createArticleController))
 	http.HandleFunc("/articles/list", adaptController("GET", listArticlesController))
 
-	fmt.Println("Server started...")
+	http.Handle("/pictures/", http.StripPrefix("/pictures/", http.FileServer(http.Dir("./uploads"))))
+
+	http.HandleFunc("/test", func(w http.ResponseWriter, req *http.Request) {
+		defer req.Body.Close()
+		err := req.ParseMultipartForm(2 * 1024 * 1024)
+		if err != nil {
+			log.Println(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		fmt.Println("value name:", req.MultipartForm.Value["name"])
+		f := req.MultipartForm.File["profile_picture"][0]
+		fmt.Println(f.Filename)
+		fmt.Println(f.Header["Content-Type"])
+		file, err := f.Open()
+		if err != nil {
+			log.Println(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		dst, err := os.Create(filepath.Join("./uploads/", f.Filename))
+		if err != nil {
+			log.Println(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		defer dst.Close()
+		bs, err := ioutil.ReadAll(file)
+		if err != nil {
+			log.Println(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		_, err = dst.Write(bs)
+		if err != nil {
+			log.Println(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("OK"))
+	})
+
+	fmt.Println("ready")
 	http.ListenAndServe(":8080", nil)
 }

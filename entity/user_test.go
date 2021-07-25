@@ -6,7 +6,7 @@ import (
 )
 
 func TestNewUserValid(t *testing.T) {
-	_, err := NewUser("validname", "valid@email.com", "v4lidp#ssword")
+	_, err := NewUser("validname", "valid@email.com", "picture", "v4lidp#ssword")
 
 	if err != nil {
 		t.Errorf("Expect %v Got %v", nil, err)
@@ -14,7 +14,7 @@ func TestNewUserValid(t *testing.T) {
 }
 
 func TestNewUserInvalid(t *testing.T) {
-	_, err := NewUser("validname", "invalidEmail", "v4lidp#ssword")
+	_, err := NewUser("validname", "invalidEmail", "picture", "v4lidp#ssword")
 
 	expectErr := UserError{reason: "Invalid email"}
 	if errors.Is(err, expectErr) == false {

@@ -14,7 +14,13 @@ func setupCreateUserUseCase(userRepo UserRepository, passHasher PasswordHasher) 
 
 func TestCreateUser(t *testing.T) {
 	email := "testmail@email.com"
-	err := createUserUseCase.Exec("testname", email, "d81fdw8fd81df81")
+	dto := &CreateUserDTO{
+		Name:     "testname",
+		Email:    email,
+		Password: "d81fdw8fd81df81",
+		Picture:  "picture",
+	}
+	err := createUserUseCase.Exec(dto)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -26,8 +32,14 @@ func TestCreateUser(t *testing.T) {
 
 func TestCreateUserErr(t *testing.T) {
 	email := "testexecerr@email.com"
-	createUserUseCase.Exec("testname", email, "d#8wvadw6dv7")
-	err := createUserUseCase.Exec("testname", email, "dawbd8awy")
+	dto := &CreateUserDTO{
+		Name:     "testname",
+		Email:    email,
+		Password: "d#8wvadw6dv7",
+		Picture:  "picture",
+	}
+	createUserUseCase.Exec(dto)
+	err := createUserUseCase.Exec(dto)
 	if errors.Is(err, ErrUserAlreadyExists{Email: email}) == false {
 		t.Errorf("Expect err to be ErrUserAlreadyExists Got %v", err)
 	}
