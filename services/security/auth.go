@@ -7,15 +7,11 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt"
-	"github.com/joho/godotenv"
 )
 
 func NewAuthProvider() *AuthProvider {
 	authProvider := new(AuthProvider)
-	err := godotenv.Load()
-	if err != nil {
-		log.Panic(err)
-	} else if os.Getenv("JWT_SECRET") == "" {
+	if os.Getenv("JWT_SECRET") == "" {
 		log.Panic(errors.New("missing env `JWT_SECRET`"))
 	}
 	authProvider.secret = []byte(os.Getenv("JWT_SECRET"))

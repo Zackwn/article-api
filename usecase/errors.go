@@ -65,3 +65,19 @@ func (ErrForbiddenUserAction) Error() string {
 func (ErrForbiddenUserAction) HttpStatus() int {
 	return http.StatusForbidden
 }
+
+type ErrInternalServer struct {
+	err error
+}
+
+func (eis ErrInternalServer) Error() string {
+	message := "Internal Server Error"
+	if eis.err != nil {
+		message += ": " + eis.err.Error()
+	}
+	return message
+}
+
+func (ErrInternalServer) HttpStatus() int {
+	return http.StatusInternalServerError
+}

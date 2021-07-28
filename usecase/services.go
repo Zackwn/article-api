@@ -29,3 +29,12 @@ type AuthProvider interface {
 	Sign(userID string) string
 	Verify(tokenString string) (*security.TokenPayload, bool)
 }
+
+type ForgotPasswordHandler interface {
+	Request(user *entity.User) (token string, err error)
+	Validate(token string) (userid string, valid bool)
+}
+
+type EmailService interface {
+	Send(to string, subject string, html string) error
+}

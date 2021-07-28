@@ -3,15 +3,16 @@ package main
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
-	"path/filepath"
 	"time"
 
+	"github.com/go-redis/redis/v8"
+	"github.com/joho/godotenv"
 	c "github.com/zackwn/article-api/controllers"
+	emailservice "github.com/zackwn/article-api/services/email"
 	filestorage "github.com/zackwn/article-api/services/file_storage"
+	fph "github.com/zackwn/article-api/services/forgot_password_handler"
 	"github.com/zackwn/article-api/services/repository/mongodb"
 	"github.com/zackwn/article-api/services/security"
 	"github.com/zackwn/article-api/usecase"
@@ -19,6 +20,13 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
+
+func init() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Panic(err)
+	}
+}
 
 func adaptController(method string, controller c.Controller) func(w http.ResponseWriter, req *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
@@ -50,10 +58,18 @@ func main() {
 	}
 	db := client.Database("articledb")
 
+	redisClient := redis.NewClient(&redis.Options{
+		Addr:     "127.0.0.1:6379",
+		Password: "", // no password
+		DB:       0,  // default DB
+	})
+
 	// services
 	passwordHasher := security.NewPasswordHasher()
 	authProvider := security.NewAuthProvider()
 	fileStorage := filestorage.NewFileStorage()
+	fph := fph.NewForgotPasswordHandler(redisClient)
+	emailService := emailservice.NewEmailService()
 
 	// repositories
 	userRepository := mongodb.NewUserRepository(db)
@@ -63,62 +79,25 @@ func main() {
 	createUserUseCase := usecase.NewCreateUserUseCase(userRepository, passwordHasher)
 	userLoginUseCase := usecase.NewUserLoginUseCase(userRepository, passwordHasher, authProvider)
 	createArticleUseCase := usecase.NewCreateArticleUseCase(authProvider, articleRepository, userRepository)
-	listArticles := usecase.NewListArticlesUseCase(articleRepository, userRepository)
+	listArticlesUseCase := usecase.NewListArticlesUseCase(articleRepository, userRepository)
+	forgotPasswordUseCase := usecase.NewForgotPasswordUseCase(userRepository, fph, emailService)
 
 	// controllers
 	userSignupController := c.NewUserSignupController(createUserUseCase, fileStorage)
 	userSigninController := c.NewUserSigninController(userLoginUseCase)
 	createArticleController := c.NewCreateArticleController(createArticleUseCase)
-	listArticlesController := c.NewListArticlesController(listArticles)
+	listArticlesController := c.NewListArticlesController(listArticlesUseCase)
+	forgotPasswordController := c.NewForgotPasswordController(forgotPasswordUseCase)
 
 	http.HandleFunc("/user/signup", adaptController("POST", userSignupController))
 	http.HandleFunc("/user/signin", adaptController("POST", userSigninController))
+
 	http.HandleFunc("/articles/create", adaptController("POST", createArticleController))
 	http.HandleFunc("/articles/list", adaptController("GET", listArticlesController))
 
-	http.Handle("/pictures/", http.StripPrefix("/pictures/", http.FileServer(http.Dir("./uploads"))))
+	http.HandleFunc("/user/forgot-password", adaptController("POST", forgotPasswordController))
 
-	http.HandleFunc("/test", func(w http.ResponseWriter, req *http.Request) {
-		defer req.Body.Close()
-		err := req.ParseMultipartForm(2 * 1024 * 1024)
-		if err != nil {
-			log.Println(err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		fmt.Println("value name:", req.MultipartForm.Value["name"])
-		f := req.MultipartForm.File["profile_picture"][0]
-		fmt.Println(f.Filename)
-		fmt.Println(f.Header["Content-Type"])
-		file, err := f.Open()
-		if err != nil {
-			log.Println(err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		dst, err := os.Create(filepath.Join("./uploads/", f.Filename))
-		if err != nil {
-			log.Println(err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		defer dst.Close()
-		bs, err := ioutil.ReadAll(file)
-		if err != nil {
-			log.Println(err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		_, err = dst.Write(bs)
-		if err != nil {
-			log.Println(err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("OK"))
-	})
+	http.Handle("/pictures/", http.StripPrefix("/pictures/", http.FileServer(http.Dir("./uploads"))))
 
 	fmt.Println("ready")
 	http.ListenAndServe(":8080", nil)
