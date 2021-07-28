@@ -62,3 +62,15 @@ func (repo MongoDBUserRepository) Store(user *entity.User) error {
 	}
 	return nil
 }
+
+func (repo MongoDBUserRepository) Update(user *entity.User) error {
+	collection := repo.db.Collection("user")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	filter := bson.D{{Key: "id", Value: user.ID}}
+	update := bson.M{
+		"$set": user,
+	}
+	_, err := collection.UpdateOne(ctx, filter, update)
+	return err
+}

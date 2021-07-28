@@ -81,3 +81,13 @@ func (eis ErrInternalServer) Error() string {
 func (ErrInternalServer) HttpStatus() int {
 	return http.StatusInternalServerError
 }
+
+type ErrInvalidChangePasswordRequest struct{}
+
+func (ErrInvalidChangePasswordRequest) Error() string {
+	return "Invalid change password request"
+}
+
+func (ErrInvalidChangePasswordRequest) HttpStatus() int {
+	return http.StatusBadRequest
+}

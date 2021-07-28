@@ -10,6 +10,7 @@ type UserRepository interface {
 	FindByEmail(email string) (*entity.User, bool)
 
 	Store(user *entity.User) error
+	Update(user *entity.User) error
 }
 
 type ArticleRepository interface {
