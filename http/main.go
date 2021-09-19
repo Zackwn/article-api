@@ -63,6 +63,12 @@ func main() {
 		Password: "", // no password
 		DB:       0,  // default DB
 	})
+	ctx, cancel3 := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel3()
+	redisSts := redisClient.Ping(ctx)
+	if redisSts.Err() != nil {
+		log.Fatal("redis: ", redisSts.Err())
+	}
 
 	// services
 	passwordHasher := security.NewPasswordHasher()
