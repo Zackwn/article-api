@@ -88,6 +88,7 @@ func main() {
 	listArticlesUseCase := usecase.NewListArticlesUseCase(articleRepository, userRepository)
 	forgotPasswordUseCase := usecase.NewForgotPasswordUseCase(userRepository, fph, emailService)
 	changePasswordUseCase := usecase.NewChangePasswordUseCase(userRepository, fph, passwordHasher)
+	userProfileUseCase := usecase.NewUserProfileUseCase(userRepository)
 
 	// controllers
 	userSignupController := c.NewUserSignupController(createUserUseCase, fileStorage)
@@ -96,6 +97,7 @@ func main() {
 	listArticlesController := c.NewListArticlesController(listArticlesUseCase)
 	forgotPasswordController := c.NewForgotPasswordController(forgotPasswordUseCase)
 	changePasswordController := c.NewChangePasswordController(changePasswordUseCase)
+	userProfileController := c.NewUserProfileController(userProfileUseCase)
 
 	http.HandleFunc("/user/signup", adaptController("POST", userSignupController))
 	http.HandleFunc("/user/signin", adaptController("POST", userSigninController))
@@ -105,6 +107,7 @@ func main() {
 
 	http.HandleFunc("/user/forgot-password", adaptController("POST", forgotPasswordController))
 	http.HandleFunc("/user/change-password", adaptController("POST", changePasswordController))
+	http.HandleFunc("/user/profile", adaptController("GET", userProfileController))
 
 	http.Handle("/pictures/", http.StripPrefix("/pictures/", http.FileServer(http.Dir("./uploads"))))
 
