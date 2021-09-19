@@ -2,7 +2,6 @@ package forgotpasswordhandler
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/go-redis/redis/v8"
@@ -38,7 +37,6 @@ func (fph ForgotPasswordHandler) Validate(token string) (string, bool) {
 	defer cancel()
 	key := fph.prefix + token
 	result := fph.redis.Get(ctx, key)
-	fmt.Println(result)
 	err := result.Err()
 	if err != nil {
 		return "", false
