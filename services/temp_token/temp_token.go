@@ -1,4 +1,4 @@
-package forgotpasswordhandler
+package temptoken
 
 import (
 	"context"
@@ -9,34 +9,34 @@ import (
 	"github.com/zackwn/article-api/entity"
 )
 
-func NewForgotPasswordHandler(redis *redis.Client) *ForgotPasswordHandler {
-	return &ForgotPasswordHandler{redis: redis, prefix: "FPH:"}
+func NewTempToken(redis *redis.Client) *TempToken {
+	return &TempToken{redis: redis, prefix: "TK:"}
 }
 
-type ForgotPasswordHandler struct {
+type TempToken struct {
 	prefix string
 	redis  *redis.Client
 }
 
-func (fph ForgotPasswordHandler) Request(user *entity.User) (string, error) {
+func (tk TempToken) New(user *entity.User) (string, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	token := uuid.NewString()
-	key := fph.prefix + token
+	key := tk.prefix + token
 	value := user.ID
 	expiration := 10 * time.Minute
-	err := fph.redis.Set(ctx, key, value, expiration).Err()
+	err := tk.redis.Set(ctx, key, value, expiration).Err()
 	if err != nil {
 		return "", err
 	}
 	return token, nil
 }
 
-func (fph ForgotPasswordHandler) Validate(token string) (string, bool) {
+func (tk TempToken) Validate(token string) (string, bool) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	key := fph.prefix + token
-	result := fph.redis.Get(ctx, key)
+	key := tk.prefix + token
+	result := tk.redis.Get(ctx, key)
 	err := result.Err()
 	if err != nil {
 		return "", false

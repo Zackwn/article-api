@@ -31,8 +31,8 @@ type AuthProvider interface {
 	Verify(tokenString string) (*security.TokenPayload, bool)
 }
 
-type ForgotPasswordHandler interface {
-	Request(user *entity.User) (token string, err error)
+type TempToken interface {
+	New(user *entity.User) (token string, err error)
 	Validate(token string) (userid string, valid bool)
 }
 

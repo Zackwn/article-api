@@ -1,12 +1,12 @@
 package usecase
 
-func NewChangePasswordUseCase(userRepo UserRepository, fph ForgotPasswordHandler, passHasher PasswordHasher) *ChangePasswordUseCase {
-	return &ChangePasswordUseCase{userRepository: userRepo, fph: fph, passwordHasher: passHasher}
+func NewChangePasswordUseCase(userRepo UserRepository, tk TempToken, passHasher PasswordHasher) *ChangePasswordUseCase {
+	return &ChangePasswordUseCase{userRepository: userRepo, tempToken: tk, passwordHasher: passHasher}
 }
 
 type ChangePasswordUseCase struct {
 	userRepository UserRepository
-	fph            ForgotPasswordHandler
+	tempToken      TempToken
 	passwordHasher PasswordHasher
 }
 
@@ -16,7 +16,7 @@ type ChangePasswordDTO struct {
 }
 
 func (changePasswordUseCase ChangePasswordUseCase) Exec(dto *ChangePasswordDTO) UseCaseErr {
-	userID, valid := changePasswordUseCase.fph.Validate(dto.Token)
+	userID, valid := changePasswordUseCase.tempToken.Validate(dto.Token)
 	if !valid {
 		return ErrInvalidChangePasswordRequest{}
 	}

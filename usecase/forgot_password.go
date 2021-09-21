@@ -2,13 +2,13 @@ package usecase
 
 import "fmt"
 
-func NewForgotPasswordUseCase(userRepo UserRepository, fph ForgotPasswordHandler, emailService EmailService) *ForgotPasswordUseCase {
-	return &ForgotPasswordUseCase{userRepository: userRepo, fph: fph, emailService: emailService}
+func NewForgotPasswordUseCase(userRepo UserRepository, tk TempToken, emailService EmailService) *ForgotPasswordUseCase {
+	return &ForgotPasswordUseCase{userRepository: userRepo, tempToken: tk, emailService: emailService}
 }
 
 type ForgotPasswordUseCase struct {
 	userRepository UserRepository
-	fph            ForgotPasswordHandler
+	tempToken      TempToken
 	emailService   EmailService
 }
 
@@ -21,12 +21,12 @@ func (forgotPasswordUseCase ForgotPasswordUseCase) Exec(dto ForgotPasswordDTO) U
 	if !found {
 		return ErrUserDoNotExists{}
 	}
-	fphToken, err := forgotPasswordUseCase.fph.Request(user)
+	token, err := forgotPasswordUseCase.tempToken.New(user)
 	if err != nil {
 		return ErrInternalServer{}
 	}
 
-	html := fmt.Sprintf(`<p>Your redefine password token: %v</p>`, fphToken)
+	html := fmt.Sprintf(`<p>Your redefine password token: %v</p>`, token)
 
 	err = forgotPasswordUseCase.emailService.Send(user.Email, "Article-API: Redefine password", html)
 	if err != nil {

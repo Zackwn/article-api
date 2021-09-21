@@ -1,16 +1,20 @@
 package usecase
 
 import (
+	"fmt"
+
 	"github.com/zackwn/article-api/entity"
 )
 
-func NewCreateUserUseCase(repo UserRepository, passHasher PasswordHasher) *CreateUserUseCase {
-	return &CreateUserUseCase{userRepository: repo, passwordHasher: passHasher}
+func NewCreateUserUseCase(repo UserRepository, passHasher PasswordHasher, emailService EmailService, tk TempToken) *CreateUserUseCase {
+	return &CreateUserUseCase{userRepository: repo, passwordHasher: passHasher, emailService: emailService, tempToken: tk}
 }
 
 type CreateUserUseCase struct {
 	userRepository UserRepository
 	passwordHasher PasswordHasher
+	emailService   EmailService
+	tempToken      TempToken
 }
 
 type CreateUserDTO struct {
@@ -36,5 +40,13 @@ func (createUserUseCase CreateUserUseCase) Exec(dto *CreateUserDTO) UseCaseErr {
 	if err != nil {
 		return ErrInvalidEntityField{errMessage: err.Error()}
 	}
+
+	token, err := createUserUseCase.tempToken.New(user)
+	if err != nil {
+		return ErrInternalServer{err}
+	}
+	html := fmt.Sprintf("<p>Your account verifier token: %v</p>", token)
+	createUserUseCase.emailService.Send(user.Email, "Verify Account", html)
+
 	return nil
 }

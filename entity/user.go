@@ -11,7 +11,8 @@ const (
 	CreateArticlesPermission UserPermission = 1 << iota
 	DeleteArticlesPermission
 
-	DefaultPermission UserPermission = CreateArticlesPermission
+	UnverifiedPermission UserPermission = 0
+	VerifiedPermisson    UserPermission = CreateArticlesPermission
 )
 
 func NewUser(name, email, picture, password string) (*User, error) {
@@ -28,10 +29,11 @@ func NewUser(name, email, picture, password string) (*User, error) {
 
 	user := new(User)
 	user.ID = GenerateID()
+	user.Verified = false
+	user.Permission = UnverifiedPermission
 	user.Name = name
 	user.Password = password
 	user.Email = email
-	user.Permission = DefaultPermission
 	user.Picture = picture
 	user.CreatedAt = Date{time.Now()}
 	return user, nil
@@ -51,6 +53,7 @@ type User struct {
 	Password  string `json:"password,omitempty" bson:"password"`
 	Email     string `json:"email" bson:"email"`
 	Picture   string `json:"picture" bson:"picture"`
+	Verified  bool   `json:"verified" bson:"verified"`
 	CreatedAt Date   `json:"created_at" bson:"created_at"`
 
 	Permission UserPermission `json:"-" bson:"permission"`

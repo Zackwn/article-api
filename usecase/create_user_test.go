@@ -8,8 +8,8 @@ import (
 
 var createUserUseCase *CreateUserUseCase
 
-func setupCreateUserUseCase(userRepo UserRepository, passHasher PasswordHasher) {
-	createUserUseCase = NewCreateUserUseCase(userRepo, passHasher)
+func setupCreateUserUseCase(userRepo UserRepository, passHasher PasswordHasher, emailService EmailService, tk TempToken) {
+	createUserUseCase = NewCreateUserUseCase(userRepo, passHasher, emailService, tk)
 }
 
 func TestCreateUser(t *testing.T) {

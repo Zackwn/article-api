@@ -12,9 +12,9 @@ import (
 	c "github.com/zackwn/article-api/controllers"
 	emailservice "github.com/zackwn/article-api/services/email"
 	filestorage "github.com/zackwn/article-api/services/file_storage"
-	fph "github.com/zackwn/article-api/services/forgot_password_handler"
 	"github.com/zackwn/article-api/services/repository/mongodb"
 	"github.com/zackwn/article-api/services/security"
+	temptoken "github.com/zackwn/article-api/services/temp_token"
 	"github.com/zackwn/article-api/usecase"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -74,7 +74,7 @@ func main() {
 	passwordHasher := security.NewPasswordHasher()
 	authProvider := security.NewAuthProvider()
 	fileStorage := filestorage.NewFileStorage()
-	fph := fph.NewForgotPasswordHandler(redisClient)
+	tempToken := temptoken.NewTempToken(redisClient)
 	emailService := emailservice.NewEmailService()
 
 	// repositories
@@ -82,12 +82,12 @@ func main() {
 	articleRepository := mongodb.NewArticleRepository(db)
 
 	// usecases
-	createUserUseCase := usecase.NewCreateUserUseCase(userRepository, passwordHasher)
+	createUserUseCase := usecase.NewCreateUserUseCase(userRepository, passwordHasher, emailService, tempToken)
 	userLoginUseCase := usecase.NewUserLoginUseCase(userRepository, passwordHasher, authProvider)
 	createArticleUseCase := usecase.NewCreateArticleUseCase(authProvider, articleRepository, userRepository)
 	listArticlesUseCase := usecase.NewListArticlesUseCase(articleRepository, userRepository)
-	forgotPasswordUseCase := usecase.NewForgotPasswordUseCase(userRepository, fph, emailService)
-	changePasswordUseCase := usecase.NewChangePasswordUseCase(userRepository, fph, passwordHasher)
+	forgotPasswordUseCase := usecase.NewForgotPasswordUseCase(userRepository, tempToken, emailService)
+	changePasswordUseCase := usecase.NewChangePasswordUseCase(userRepository, tempToken, passwordHasher)
 	userProfileUseCase := usecase.NewUserProfileUseCase(userRepository)
 
 	// controllers
