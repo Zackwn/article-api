@@ -89,6 +89,7 @@ func main() {
 	forgotPasswordUseCase := usecase.NewForgotPasswordUseCase(userRepository, tempToken, emailService)
 	changePasswordUseCase := usecase.NewChangePasswordUseCase(userRepository, tempToken, passwordHasher)
 	userProfileUseCase := usecase.NewUserProfileUseCase(userRepository)
+	verifyAccountUseCase := usecase.NewVerifyAccountUseCase(userRepository, tempToken)
 
 	// controllers
 	userSignupController := c.NewUserSignupController(createUserUseCase, fileStorage)
@@ -98,8 +99,10 @@ func main() {
 	forgotPasswordController := c.NewForgotPasswordController(forgotPasswordUseCase)
 	changePasswordController := c.NewChangePasswordController(changePasswordUseCase)
 	userProfileController := c.NewUserProfileController(userProfileUseCase)
+	verifyAccountController := c.NewVerifyAccountController(verifyAccountUseCase)
 
 	http.HandleFunc("/user/signup", adaptController("POST", userSignupController))
+	http.HandleFunc("/user/verify", adaptController("POST", verifyAccountController))
 	http.HandleFunc("/user/signin", adaptController("POST", userSigninController))
 
 	http.HandleFunc("/articles/create", adaptController("POST", createArticleController))

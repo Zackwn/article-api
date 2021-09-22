@@ -91,3 +91,13 @@ func (ErrInvalidChangePasswordRequest) Error() string {
 func (ErrInvalidChangePasswordRequest) HttpStatus() int {
 	return http.StatusBadRequest
 }
+
+type ErrInvalidVerifyAccountRequest struct{}
+
+func (ErrInvalidVerifyAccountRequest) Error() string {
+	return "Invalid verify account request"
+}
+
+func (ErrInvalidVerifyAccountRequest) HttpStatus() int {
+	return http.StatusBadRequest
+}
