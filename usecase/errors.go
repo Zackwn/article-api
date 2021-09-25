@@ -101,3 +101,13 @@ func (ErrInvalidVerifyAccountRequest) Error() string {
 func (ErrInvalidVerifyAccountRequest) HttpStatus() int {
 	return http.StatusBadRequest
 }
+
+type ErrArticleDoNotExists struct{}
+
+func (ErrArticleDoNotExists) Error() string {
+	return "Article do not exists"
+}
+
+func (ErrArticleDoNotExists) HttpStatus() int {
+	return http.StatusBadRequest
+}

@@ -19,6 +19,7 @@ type ArticleRepository interface {
 	FindAllByAuthor(authorID string) []*entity.Article
 
 	Store(article *entity.Article) error
+	Delete(articleID string) error
 }
 
 type PasswordHasher interface {

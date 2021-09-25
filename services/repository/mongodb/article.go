@@ -82,3 +82,12 @@ func (repo ArticleRepository) All() []*entity.Article {
 	}
 	return articles
 }
+
+func (repo ArticleRepository) Delete(articleID string) error {
+	collection := repo.db.Collection("article")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	filter := bson.D{{Key: "id", Value: articleID}}
+	_, err := collection.DeleteOne(ctx, filter)
+	return err
+}

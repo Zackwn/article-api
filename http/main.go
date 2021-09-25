@@ -90,6 +90,7 @@ func main() {
 	changePasswordUseCase := usecase.NewChangePasswordUseCase(userRepository, tempToken, passwordHasher)
 	userProfileUseCase := usecase.NewUserProfileUseCase(userRepository)
 	verifyAccountUseCase := usecase.NewVerifyAccountUseCase(userRepository, tempToken)
+	deleteArticleUseCase := usecase.NewDeleteArticleUseCase(userRepository, articleRepository, authProvider)
 
 	// controllers
 	userSignupController := c.NewUserSignupController(createUserUseCase, fileStorage)
@@ -100,16 +101,19 @@ func main() {
 	changePasswordController := c.NewChangePasswordController(changePasswordUseCase)
 	userProfileController := c.NewUserProfileController(userProfileUseCase)
 	verifyAccountController := c.NewVerifyAccountController(verifyAccountUseCase)
+	deleteArticleController := c.NewDeleteArticleController(deleteArticleUseCase)
 
 	http.HandleFunc("/user/signup", adaptController("POST", userSignupController))
 	http.HandleFunc("/user/verify", adaptController("POST", verifyAccountController))
 	http.HandleFunc("/user/signin", adaptController("POST", userSigninController))
 
 	http.HandleFunc("/articles/create", adaptController("POST", createArticleController))
+	http.HandleFunc("/articles/delete", adaptController("DELETE", deleteArticleController))
 	http.HandleFunc("/articles/list", adaptController("GET", listArticlesController))
 
 	http.HandleFunc("/user/forgot-password", adaptController("POST", forgotPasswordController))
 	http.HandleFunc("/user/change-password", adaptController("POST", changePasswordController))
+
 	http.HandleFunc("/user/profile", adaptController("GET", userProfileController))
 
 	http.Handle("/pictures/", http.StripPrefix("/pictures/", http.FileServer(http.Dir("./uploads"))))
