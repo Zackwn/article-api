@@ -20,7 +20,7 @@ func TestCreateUser(t *testing.T) {
 		Password: "d81fdw8fd81df81",
 		Picture:  "picture",
 	}
-	err := createUserUseCase.Exec(dto)
+	_, err := createUserUseCase.Exec(dto)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -39,7 +39,7 @@ func TestCreateUserErr(t *testing.T) {
 		Picture:  "picture",
 	}
 	createUserUseCase.Exec(dto)
-	err := createUserUseCase.Exec(dto)
+	_, err := createUserUseCase.Exec(dto)
 	if errors.Is(err, ErrUserAlreadyExists{Email: email}) == false {
 		t.Errorf("Expect err to be ErrUserAlreadyExists Got %v", err)
 	}

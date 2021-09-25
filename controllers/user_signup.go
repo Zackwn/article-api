@@ -8,13 +8,14 @@ import (
 	"github.com/zackwn/article-api/usecase"
 )
 
-func NewUserSignupController(useCase *usecase.CreateUserUseCase, fileStorage FileStorage) *UserSignupController {
-	return &UserSignupController{createUserUseCase: useCase, fileStorage: fileStorage}
+func NewUserSignupController(CreateUserUseCase *usecase.CreateUserUseCase, fileStorage FileStorage, SVATUseCase *usecase.SendVerifyAccountTokenUseCase) *UserSignupController {
+	return &UserSignupController{createUserUseCase: CreateUserUseCase, fileStorage: fileStorage, sendVerifyAccountToken: SVATUseCase}
 }
 
 type UserSignupController struct {
-	createUserUseCase *usecase.CreateUserUseCase
-	fileStorage       FileStorage
+	createUserUseCase      *usecase.CreateUserUseCase
+	sendVerifyAccountToken *usecase.SendVerifyAccountTokenUseCase
+	fileStorage            FileStorage
 }
 
 func (userSignUpController UserSignupController) Handle(req *http.Request) *Response {
@@ -54,19 +55,27 @@ func (userSignUpController UserSignupController) Handle(req *http.Request) *Resp
 
 	fmt.Println(pictureURL)
 
-	// usecase
+	// create user usecase
 	dto := &usecase.CreateUserDTO{
 		Name:     name,
 		Email:    email,
 		Password: password,
 		Picture:  pictureURL,
 	}
-	uErr := userSignUpController.createUserUseCase.Exec(dto)
+	user, uErr := userSignUpController.createUserUseCase.Exec(dto)
 	if uErr != nil {
 		err = userSignUpController.fileStorage.Discard(filename)
 		if err != nil {
 			log.Println(err)
 		}
+		return ErrorResponse(uErr)
+	}
+	// send verify account token usecase
+	svatDto := &usecase.SendVerifyAccountTokenDTO{
+		UserID: user.ID,
+	}
+	uErr = userSignUpController.sendVerifyAccountToken.Exec(svatDto)
+	if uErr != nil {
 		return ErrorResponse(uErr)
 	}
 	return StatusResponse(http.StatusOK)

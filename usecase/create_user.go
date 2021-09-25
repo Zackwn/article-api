@@ -1,8 +1,6 @@
 package usecase
 
 import (
-	"fmt"
-
 	"github.com/zackwn/article-api/entity"
 )
 
@@ -24,29 +22,21 @@ type CreateUserDTO struct {
 	Picture  string
 }
 
-func (createUserUseCase CreateUserUseCase) Exec(dto *CreateUserDTO) UseCaseErr {
+func (createUserUseCase CreateUserUseCase) Exec(dto *CreateUserDTO) (*entity.User, UseCaseErr) {
 	_, userAlreadyExists := createUserUseCase.userRepository.FindByEmail(dto.Email)
 	if userAlreadyExists {
-		return ErrUserAlreadyExists{Email: dto.Email}
+		return nil, ErrUserAlreadyExists{Email: dto.Email}
 	}
 
 	hashPassword := createUserUseCase.passwordHasher.HashPassword(dto.Password)
 
 	user, err := entity.NewUser(dto.Name, dto.Email, dto.Picture, hashPassword)
 	if err != nil {
-		return ErrInvalidEntityField{errMessage: err.Error()}
+		return nil, ErrInvalidEntityField{errMessage: err.Error()}
 	}
 	err = createUserUseCase.userRepository.Store(user)
 	if err != nil {
-		return ErrInvalidEntityField{errMessage: err.Error()}
+		return nil, ErrInvalidEntityField{errMessage: err.Error()}
 	}
-
-	token, err := createUserUseCase.tempToken.New(user)
-	if err != nil {
-		return ErrInternalServer{err}
-	}
-	html := fmt.Sprintf("<p>Your account verifier token: %v</p>", token)
-	createUserUseCase.emailService.Send(user.Email, "Verify Account", html)
-
-	return nil
+	return user, nil
 }

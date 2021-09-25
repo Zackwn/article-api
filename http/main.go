@@ -91,9 +91,10 @@ func main() {
 	userProfileUseCase := usecase.NewUserProfileUseCase(userRepository)
 	verifyAccountUseCase := usecase.NewVerifyAccountUseCase(userRepository, tempToken)
 	deleteArticleUseCase := usecase.NewDeleteArticleUseCase(userRepository, articleRepository, authProvider)
+	sendVerifyAccountTokenUseCase := usecase.NewSendVerifyAccoutTokenUseCase(userRepository, authProvider, tempToken, emailService)
 
 	// controllers
-	userSignupController := c.NewUserSignupController(createUserUseCase, fileStorage)
+	userSignupController := c.NewUserSignupController(createUserUseCase, fileStorage, sendVerifyAccountTokenUseCase)
 	userSigninController := c.NewUserSigninController(userLoginUseCase)
 	createArticleController := c.NewCreateArticleController(createArticleUseCase)
 	listArticlesController := c.NewListArticlesController(listArticlesUseCase)
